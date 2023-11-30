@@ -34,4 +34,43 @@ int do_snapshot(kvs_t* kvs, const char* filename) {
  
 	return 0;
  }
+int main()
+{
+	kvs_t* kvs = open();
+	if(!kvs) {
+		printf("Failed to open kvs\n");
+		return -1;
+	}
+	FILE* inputFile = fopen("cluster004.trc","r");
+	if(!inputFile){
+		printf("Failed to open cluster004");
+		close(kvs);
+		return -1;}
+	FILE* outputFile=fopen("kvs.img","w");
+	if(!outputFile){
+		printf("Failed to open kvs.img");
+		fclose(inputFile);
+		close(kvs);
+		return -1;
+	}
+
+	char key [1024];
+	char value [1024];
+	while(1){
+		int nread=fread(key,1,sizeof(key),inputFile);
+		if(nread<sizeof(key)){
+			break;
+		}
+		nread=fread(value,1,sizeof(value),inputFile);
+         	if(nread <sizeof(value)){
+			break;
+		}
+		fprintf(outputFile,"%s %s\n",key,value);
+	}
+	do_snapshot(kvs,"cluster004.trc");
+	fclose(inputFile);
+	fclose(outputFile);
+	close(kvs);
+	return 0;
+}
 

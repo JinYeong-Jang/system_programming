@@ -12,4 +12,26 @@ void do_baseline_snapshot(kvs_t* kvs){
 	}
 	fclose(fp);
 }
+////////////////
+#include "kvs.h"
+#include <errno.h>
+ 
+int do_snapshot(kvs_t* kvs, const char* filename) {
+
+	FILE* kvs_fp = fopen(filename, "w");
+	if (!kvs_fp) {
+		printf("Failed to open %s file: %s", filename, strerror(errno));
+		return -1;
+	}
+ 
+	node_t* current = kvs->db;
+	while (current != NULL) {
+		fprintf(kvs_fp, "%s %s", current->key, current->value);
+		current = current->next;
+	}
+
+	fclose(kvs_fp);
+ 
+	return 0;
+ }
 

@@ -1,25 +1,37 @@
- #include "kvs.h"
- 
- int do_recovery(kvs_t* kvs) {
-     // Open the input file
-     FILE* fp = fopen("kvs.img", "rb");
-     if (fp == NULL) {
-         return -1;
-     }
-     // Create a new database
-     kvs_t* new_kvs = open();
-     if (new_kvs == NULL) {
-         return -1;
-     }
-     // Read the database from the file
-     char key[100];
-     char value[100];
-     while (fread(key, sizeof(key), 1, fp) == 1) {
-         fread(value, sizeof(value), 1, fp);
-         set(new_kvs, key, value);
-     }
-     fclose(fp);
-     close(kvs);
-     kvs = new_kvs;
-     return 0;
- }
+#include "kvs.h"
+#include <stdio.h>
+
+kvs_t* do_recovery(kvs_t* kvs){
+    char key[100];
+    char value[5000];
+    
+    FILE* fp =fopen("kvs.img","r");
+    if(fp)
+    {
+    	while (fgets(key, sizeof(key), fp) != NULL) {
+    		node_t* new_node = (node_t*)malloc(sizeof(node_t));	
+    		key[strcspn(key, "\n")] = 0;
+    		
+    		fgets(value, sizeof(value), fp);
+		strncpy(new_node->key, key, sizeof(new_node -> key));
+		new_node->value = strdup(value);
+		
+		if(kvs->db == NULL)
+			kvs->db = new_node;
+		else{
+			node_t* current = kvs->db;
+			while(current->next != NULL){
+				current = current->next;	
+			}
+			current->next = new_node;
+		}
+		kvs->items++;
+	}
+	fclose(fp);
+	return kvs;
+    }
+    else
+    	return kvs;
+}
+
+   
